@@ -64,3 +64,14 @@ class StudyPlan(Base):
     status = Column(String)   # pending / completed
 
 
+class TopicContent(Base):
+    __tablename__ = "topic_content"
+
+    id = Column(Integer, primary_key=True)
+    topic_id = Column(Integer, ForeignKey('topics.id'))
+    content_type = Column(String)  # text / video / animation
+    file_path = Column(String)      # path to file: content/C/(1)intro.md or videos/(1)intro.mp4
+    order_index = Column(Integer)   # sequence order
+    duration_mins = Column(Integer)  # for video/animation
+
+

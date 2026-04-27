@@ -1,4 +1,8 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 class Config:
-    SECRET_KEY = "leadenT_secret_key_2026_do_not_share_this"
-    GEMINI_API_KEY = "AIzaSyCfEBBH7QjbnTMS31M2Fd1g1PoLolJMm4M"  # Get from https://aistudio.google.com/apikey
-    
+    SECRET_KEY = os.getenv("SECRET_KEY", "change_me_in_production")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

@@ -10,12 +10,17 @@ Folder structure:
   │   ├── (2)Topic.md
   │   └── videos/
   │       └── (1)Topic.mp4
+
+Environment variables:
+  CONTENT_PATH - path to content directory (default: ./content)
 """
 import os
 import re
 from pathlib import Path
 
-BASE_CONTENT_PATH = Path(__file__).parent / "content"
+# Get content path from environment, fallback to ./content relative to this file
+CONTENT_PATH_ENV = os.getenv("CONTENT_PATH", "")
+BASE_CONTENT_PATH = Path(CONTENT_PATH_ENV) if CONTENT_PATH_ENV else Path(__file__).parent / "content"
 
 
 def get_all_subjects() -> list[str]:
@@ -98,6 +103,25 @@ def load_video_path(file_path: str) -> str:
     return ""
 
 
+def load_video_path_for_topic(subject: str, topic_order: int) -> str:
+    """
+    Find video for a topic by looking for (N)*.mp4 in the videos folder.
+    Matches by topic order number, not exact filename.
+    """
+    subject_path = BASE_CONTENT_PATH / subject / "videos"
+    if not subject_path.exists():
+        return ""
+
+    # Look for video with matching order number
+    for video_file in subject_path.glob("*.mp4"):
+        # Match pattern (N)*.mp4 where N is the topic order
+        match = re.match(r"^\((\d+)\).*\.mp4$", video_file.name)
+        if match and int(match.group(1)) == topic_order:
+            return str(video_file)
+
+    return ""
+
+
 def get_content_for_topic(subject: str, topic_order: int) -> dict:
     """
     Get all content (text + video) for a specific topic by order number.
@@ -110,10 +134,11 @@ def get_content_for_topic(subject: str, topic_order: int) -> dict:
         return {"text": "", "video_filename": "", "has_video": False, "name": ""}
 
     text = load_text_content(topic_data["text_path"])
-    video_full_path = load_video_path(topic_data["video_path"])
+    # Use smart video finder that matches by order number
+    video_full_path = load_video_path_for_topic(subject, topic_order)
 
     # Extract just the filename
-    video_filename = topic_data["video_path"].split("/")[-1] if video_full_path else ""
+    video_filename = video_full_path.split("/")[-1].split("\\")[-1] if video_full_path else ""
 
     return {
         "text": text,

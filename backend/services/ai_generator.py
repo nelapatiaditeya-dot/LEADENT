@@ -1,3 +1,6 @@
+from google import genai
+client=genai.Client()
+
 
 
 def build_prompt(text: str, level: str):
